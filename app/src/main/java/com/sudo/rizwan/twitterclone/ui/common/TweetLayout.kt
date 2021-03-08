@@ -1,35 +1,43 @@
 package com.sudo.rizwan.twitterclone.ui.common
 
-import androidx.compose.Composable
-import androidx.ui.core.Alignment
-import androidx.ui.core.ContentScale
-import androidx.ui.core.Modifier
-import androidx.ui.core.clip
-import androidx.ui.foundation.Clickable
-import androidx.ui.foundation.Image
-import androidx.ui.foundation.shape.corner.RoundedCornerShape
-import androidx.ui.layout.*
-import androidx.ui.material.ripple.ripple
-import androidx.ui.res.imageResource
-import androidx.ui.text.TextStyle
-import androidx.ui.text.font.FontWeight
-import androidx.ui.unit.dp
-import androidx.ui.unit.sp
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.sudo.rizwan.twitterclone.R
 import com.sudo.rizwan.twitterclone.models.Tweet
+import com.sudo.rizwan.twitterclone.state.AppStateViewModel
 import com.sudo.rizwan.twitterclone.state.Screen
-import com.sudo.rizwan.twitterclone.state.navigateTo
 
 @Composable
 fun TweetLayout(tweet: Tweet) {
     Row(modifier = Modifier.padding(all = 10.dp)) {
         UserAvatar(tweet)
-        Spacer(modifier = Modifier.preferredSize(12.dp))
+        Spacer(modifier = Modifier.size(12.dp))
         Column {
             NameAndUserName(tweet)
-            Spacer(modifier = Modifier.preferredSize(1.dp))
+            Spacer(modifier = Modifier.size(1.dp))
             TweetAndImage(tweet)
-            Spacer(modifier = Modifier.preferredSize(10.dp))
+            Spacer(modifier = Modifier.size(10.dp))
             TweetActions(tweet)
         }
     }
@@ -38,49 +46,53 @@ fun TweetLayout(tweet: Tweet) {
 @Composable
 private fun TweetActions(tweet: Tweet) {
     Row(
-        modifier = Modifier.fillMaxWidth() + Modifier.padding(end = 40.dp),
-        verticalGravity = Alignment.CenterVertically,
+        modifier = Modifier.fillMaxWidth().padding(end = 40.dp),
+        verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         val imageSize = 18.dp
         Row {
             Image(
-                imageResource(R.drawable.ic_comment),
-                modifier = Modifier.preferredSize(imageSize)
+                painterResource(R.drawable.ic_comment),
+                contentDescription = null,
+                modifier = Modifier.size(imageSize)
             )
-            Spacer(modifier = Modifier.preferredSize(4.dp))
+            Spacer(modifier = Modifier.size(4.dp))
             GrayText(text = tweet.comments.toString())
         }
 
-        Clickable(
-            modifier = Modifier.ripple(enabled = true),
-            onClick = { tweet.retweet() }) {
-            Row {
-                Image(
-                    imageResource(if (tweet.retweeted) R.drawable.ic_retweeted else R.drawable.ic_retweet),
-                    modifier = Modifier.preferredSize(imageSize)
-                )
-                Spacer(modifier = Modifier.preferredSize(4.dp))
-                GrayText(text = tweet.retweets.toString())
-            }
+        Row(
+            modifier = Modifier.clickable(
+                onClick = { tweet.retweet() }
+            )
+        ) {
+            Image(
+                painterResource(if (tweet.retweeted) R.drawable.ic_retweeted else R.drawable.ic_retweet),
+                contentDescription = null,
+                modifier = Modifier.size(imageSize)
+            )
+            Spacer(modifier = Modifier.size(4.dp))
+            GrayText(text = tweet.retweets.toString())
         }
 
-        Clickable(
-            modifier = Modifier.ripple(enabled = true),
-            onClick = { tweet.like() }) {
-            Row {
-                Image(
-                    imageResource(if (tweet.liked) R.drawable.ic_liked else R.drawable.ic_like),
-                    modifier = Modifier.preferredSize(imageSize)
-                )
-                Spacer(modifier = Modifier.preferredSize(4.dp))
-                GrayText(text = tweet.likes.toString())
-            }
+        Row(
+            modifier = Modifier.clickable(
+                onClick = { tweet.like() }
+            )
+        ) {
+            Image(
+                painterResource(if (tweet.liked) R.drawable.ic_liked else R.drawable.ic_like),
+                contentDescription = null,
+                modifier = Modifier.size(imageSize)
+            )
+            Spacer(modifier = Modifier.size(4.dp))
+            GrayText(text = tweet.likes.toString())
         }
 
         Image(
-            imageResource(R.drawable.ic_share),
-            modifier = Modifier.preferredSize(imageSize)
+            painterResource(R.drawable.ic_share),
+            contentDescription = null,
+            modifier = Modifier.size(imageSize)
         )
     }
 }
@@ -92,11 +104,12 @@ private fun TweetAndImage(tweet: Tweet) {
         style = TextStyle(fontSize = 14.sp)
     )
     if (tweet.image != null) {
-        Spacer(modifier = Modifier.preferredHeight(10.dp))
+        Spacer(modifier = Modifier.height(10.dp))
         Image(
-            imageResource(tweet.image),
+            painterResource(tweet.image),
+            contentDescription = null,
             modifier = Modifier
-                .preferredHeight(180.dp)
+                .height(180.dp)
                 .fillMaxWidth()
                 .clip(shape = RoundedCornerShape(2.dp)),
             contentScale = ContentScale.Crop
@@ -106,29 +119,37 @@ private fun TweetAndImage(tweet: Tweet) {
 
 @Composable
 private fun NameAndUserName(tweet: Tweet) {
-    Row(verticalGravity = Alignment.CenterVertically) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
         ThemedText(
             text = tweet.user.name,
             style = TextStyle(fontWeight = FontWeight.Bold, fontSize = 16.sp)
         )
         if (tweet.user.verified) {
-            Spacer(modifier = Modifier.preferredSize(2.dp))
+            Spacer(modifier = Modifier.size(2.dp))
             Image(
-                imageResource(R.drawable.ic_verified),
-                modifier = Modifier.preferredSize(16.dp)
+                painterResource(R.drawable.ic_verified),
+                contentDescription = null,
+                modifier = Modifier.size(16.dp)
             )
         }
-        Spacer(modifier = Modifier.preferredSize(5.dp))
+        Spacer(modifier = Modifier.size(5.dp))
         GrayText(text = "@${tweet.user.username} · ${tweet.timeAgo()}")
     }
 }
 
 @Composable
 private fun UserAvatar(tweet: Tweet) {
-    Clickable(onClick = { navigateTo(Screen.Profile(tweet.user)) }) {
+    val appState = viewModel<AppStateViewModel>()
+
+    Box(
+        modifier = Modifier.clickable(
+            onClick = { appState.navigateTo(Screen.Profile(tweet.user)) }
+        )
+    ) {
         Image(
-            imageResource(tweet.user.avatar),
-            modifier = Modifier.preferredSize(50.dp).clip(shape = RoundedCornerShape(25.dp)),
+            painterResource(tweet.user.avatar),
+            contentDescription = null,
+            modifier = Modifier.size(50.dp).clip(shape = RoundedCornerShape(25.dp)),
             contentScale = ContentScale.Crop
         )
     }

@@ -1,12 +1,13 @@
 package com.sudo.rizwan.twitterclone.ui.home
 
-import androidx.compose.Composable
-import androidx.ui.core.Modifier
-import androidx.ui.foundation.VerticalScroller
-import androidx.ui.layout.Column
-import androidx.ui.layout.padding
-import androidx.ui.material.ScaffoldState
-import androidx.ui.unit.dp
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.ScaffoldState
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import com.sudo.rizwan.twitterclone.state.tweets
 import com.sudo.rizwan.twitterclone.ui.common.CustomDivider
 import com.sudo.rizwan.twitterclone.ui.common.TweetLayout
@@ -15,14 +16,11 @@ import com.sudo.rizwan.twitterclone.ui.common.TweetLayout
 fun Content(scaffoldState: ScaffoldState) {
     Column(modifier = Modifier.padding(bottom = 54.dp)) {
         TopBar(scaffoldState = scaffoldState)
-        VerticalScroller {
-            Column {
-                tweets.forEach { tweet ->
-                    TweetLayout(tweet)
-                    CustomDivider()
-                }
+        LazyColumn {
+            items(tweets) { tweet ->
+                TweetLayout(tweet)
+                CustomDivider()
             }
         }
     }
 }
-

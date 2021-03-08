@@ -1,17 +1,17 @@
 package com.sudo.rizwan.twitterclone.ui.home
 
-import androidx.compose.Composable
-import androidx.compose.remember
-import androidx.ui.material.Scaffold
-import androidx.ui.material.ScaffoldState
+import androidx.compose.material.Scaffold
+import androidx.compose.material.ScaffoldState
+import androidx.compose.material.rememberScaffoldState
+import androidx.compose.runtime.Composable
 
 @Composable
-fun Home(scaffoldState: ScaffoldState = remember { ScaffoldState() }) {
+fun Home(scaffoldState: ScaffoldState = rememberScaffoldState() ) {
     Scaffold(
         scaffoldState = scaffoldState,
         drawerContent = { AppDrawer() },
-        bodyContent = { Content(scaffoldState = scaffoldState) },
+        content = { Content(scaffoldState = scaffoldState) },
         floatingActionButton = { Fab() },
-        bottomAppBar = { BottomBar() }
+        bottomBar = { BottomBar() }
     )
 }

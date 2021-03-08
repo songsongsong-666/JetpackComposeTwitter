@@ -1,28 +1,40 @@
 package com.sudo.rizwan.twitterclone.ui.home
 
-import androidx.compose.Composable
-import androidx.compose.state
-import androidx.ui.core.Alignment
-import androidx.ui.core.ContentScale
-import androidx.ui.core.Modifier
-import androidx.ui.core.clip
-import androidx.ui.foundation.Dialog
-import androidx.ui.foundation.Image
-import androidx.ui.foundation.shape.corner.RoundedCornerShape
-import androidx.ui.graphics.Color
-import androidx.ui.layout.*
-import androidx.ui.material.Button
-import androidx.ui.material.RadioButton
-import androidx.ui.material.Surface
-import androidx.ui.res.imageResource
-import androidx.ui.text.TextStyle
-import androidx.ui.unit.dp
-import androidx.ui.unit.sp
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Button
+import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.RadioButton
+import androidx.compose.material.Surface
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.sudo.rizwan.twitterclone.R
 import com.sudo.rizwan.twitterclone.darkThemeColors
 import com.sudo.rizwan.twitterclone.darkerThemeColors
 import com.sudo.rizwan.twitterclone.lightThemeColors
-import com.sudo.rizwan.twitterclone.state.AppState
+import com.sudo.rizwan.twitterclone.state.AppStateViewModel
 import com.sudo.rizwan.twitterclone.state.sudorizwan
 import com.sudo.rizwan.twitterclone.ui.common.CustomDivider
 import com.sudo.rizwan.twitterclone.ui.common.ThemedText
@@ -30,20 +42,24 @@ import com.sudo.rizwan.twitterclone.ui.common.UserInfo
 
 @Composable
 fun AppDrawer() {
-    val showThemeDialog = state { false }
-    Surface(color = AppState.theme.surface) {
+    val appState = viewModel<AppStateViewModel>()
+    val theme = appState.theme.observeAsState(lightThemeColors)
+
+    val showThemeDialog = remember { mutableStateOf(false) }
+    Surface(color = theme.value!!.surface) {
         Column {
             Column(modifier = Modifier.padding(start = 16.dp, top = 16.dp, end = 16.dp)) {
                 Image(
-                    imageResource(R.drawable.profile_image),
+                    painterResource(R.drawable.profile_image),
+                    contentDescription = null,
                     modifier = Modifier
-                        .preferredSize(50.dp)
+                        .size(50.dp)
                         .clip(shape = RoundedCornerShape(25.dp)),
                     contentScale = ContentScale.Crop
                 )
-                Spacer(modifier = Modifier.preferredHeight(2.dp))
+                Spacer(modifier = Modifier.height(2.dp))
                 UserInfo(sudorizwan)
-                Spacer(modifier = Modifier.preferredHeight(16.dp))
+                Spacer(modifier = Modifier.height(16.dp))
             }
             CustomDivider()
             Column(modifier = Modifier.padding(start = 16.dp, end = 16.dp)) {
@@ -81,53 +97,65 @@ fun AppDrawer() {
             CustomDivider()
             Row(
                 modifier = Modifier.fillMaxWidth()
-                    .preferredHeight(40.dp),
+                    .height(40.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
-                verticalGravity = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 Button(
-                    padding = InnerPadding(all = 0.dp),
-                    backgroundColor = Color.Transparent,
-                    elevation = 0.dp,
+                    modifier = Modifier.padding(all = 0.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        backgroundColor = Color.Transparent
+                    ),
+                    elevation = ButtonDefaults.elevation(
+                        defaultElevation = 0.dp,
+                        pressedElevation = 0.dp
+                    ),
                     onClick = { showThemeDialog.value = true }) {
                     Image(
-                        imageResource(R.drawable.ic_theme),
-                        modifier = Modifier.preferredSize(30.dp)
+                        painterResource(R.drawable.ic_theme),
+                        contentDescription = null,
+                        modifier = Modifier.size(30.dp)
                     )
                 }
                 Button(
-                    padding = InnerPadding(all = 0.dp),
-                    backgroundColor = Color.Transparent,
-                    elevation = 0.dp,
+                    modifier = Modifier.padding(all = 0.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        backgroundColor = Color.Transparent
+                    ),
+                    elevation = ButtonDefaults.elevation(
+                        defaultElevation = 0.dp,
+                        pressedElevation = 0.dp
+                    ),
                     onClick = {}) {
                     Image(
-                        imageResource(R.drawable.ic_qrcode),
-                        modifier = Modifier.preferredSize(30.dp)
+                        painterResource(R.drawable.ic_qrcode),
+                        contentDescription = null,
+                        modifier = Modifier.size(30.dp)
                     )
                 }
             }
         }
         if (showThemeDialog.value) {
-            Dialog(onCloseRequest = { showThemeDialog.value = false }) {
+            Dialog(onDismissRequest = { showThemeDialog.value = false }) {
                 Surface(
-                    modifier = Modifier.preferredWidth(300.dp),
+                    modifier = Modifier.width(300.dp),
                     shape = RoundedCornerShape(10.dp),
-                    color = AppState.theme.surface
+                    color = theme.value!!.surface
                 ) {
                     Column(modifier = Modifier.padding(24.dp)) {
                         ThemedText(text = "Pick a theme", style = TextStyle(fontSize = 22.sp))
-                        Spacer(modifier = Modifier.preferredHeight(16.dp))
-                        ThemeOption("Light", AppState.theme == lightThemeColors) {
+                        Spacer(modifier = Modifier.height(16.dp))
+                        ThemeOption("Light", theme.value == lightThemeColors) {
                             // on click
-                            AppState.theme = lightThemeColors
+                            appState.theme.value = lightThemeColors
                         }
-                        ThemeOption("Dark", AppState.theme == darkThemeColors) {
+                        ThemeOption("Dark", theme.value == darkThemeColors) {
                             // on click
-                            AppState.theme = darkThemeColors
+                            appState.theme.value = darkThemeColors
                         }
-                        ThemeOption("Darker", AppState.theme == darkerThemeColors) {
+                        ThemeOption("Darker", theme.value == darkerThemeColors) {
                             // on click
-                            AppState.theme = darkerThemeColors
+                            appState.theme.value = darkerThemeColors
                         }
                     }
                 }
@@ -138,12 +166,13 @@ fun AppDrawer() {
 
 @Composable
 fun SideBarListItem(text: String, icon: Int) {
-    Row(modifier = Modifier.preferredHeight(50.dp), verticalGravity = Alignment.CenterVertically) {
+    Row(modifier = Modifier.height(50.dp), verticalAlignment = Alignment.CenterVertically) {
         Image(
-            imageResource(icon),
-            modifier = Modifier.preferredSize(24.dp)
+            painterResource(icon),
+            contentDescription = null,
+            modifier = Modifier.size(24.dp)
         )
-        Spacer(modifier = Modifier.preferredWidth(12.dp))
+        Spacer(modifier = Modifier.width(12.dp))
         ThemedText(
             text = text,
             style = TextStyle(fontSize = 18.sp)
@@ -153,17 +182,26 @@ fun SideBarListItem(text: String, icon: Int) {
 
 @Composable
 private fun ThemeOption(text: String, selected: Boolean, onSelect: () -> Unit) {
-    Button(onClick = onSelect, backgroundColor = Color.Transparent, elevation = 0.dp) {
+    Button(
+        onClick = onSelect,
+        colors = ButtonDefaults.buttonColors(
+            backgroundColor = Color.Transparent
+        ),
+        elevation = ButtonDefaults.elevation(
+            defaultElevation = 0.dp,
+            pressedElevation = 0.dp
+        )
+    ) {
         Row(
-            modifier = Modifier.preferredHeight(34.dp).fillMaxWidth(),
-            verticalGravity = Alignment.CenterVertically
+            modifier = Modifier.height(34.dp).fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
         ) {
             RadioButton(
                 selected = selected,
-                onSelect = onSelect,
-                color = AppState.theme.primary
+                onClick = onSelect,
+                // TODO colors = AppState.theme.primary
             )
-            Spacer(modifier = Modifier.preferredWidth(16.dp))
+            Spacer(modifier = Modifier.width(16.dp))
             ThemedText(text = text)
         }
     }

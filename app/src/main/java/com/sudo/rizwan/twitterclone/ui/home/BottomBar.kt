@@ -1,21 +1,27 @@
 package com.sudo.rizwan.twitterclone.ui.home
 
-import androidx.compose.Composable
-import androidx.ui.core.Modifier
-import androidx.ui.foundation.Image
-import androidx.ui.layout.Arrangement
-import androidx.ui.layout.Row
-import androidx.ui.layout.preferredSize
-import androidx.ui.material.BottomAppBar
-import androidx.ui.material.IconButton
-import androidx.ui.res.imageResource
-import androidx.ui.unit.dp
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.BottomAppBar
+import androidx.compose.material.IconButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.sudo.rizwan.twitterclone.R
-import com.sudo.rizwan.twitterclone.state.AppState
+import com.sudo.rizwan.twitterclone.lightThemeColors
+import com.sudo.rizwan.twitterclone.state.AppStateViewModel
 
 @Composable
 fun BottomBar() {
-    BottomAppBar(backgroundColor = AppState.theme.surface) {
+    val appState = viewModel<AppStateViewModel>()
+    val theme = appState.theme.observeAsState(lightThemeColors)
+
+    BottomAppBar(backgroundColor = theme.value!!.surface) {
         Row(
             modifier = Modifier.weight(1f),
             horizontalArrangement = Arrangement.SpaceAround
@@ -32,8 +38,9 @@ fun BottomBar() {
 private fun BottomBarIcon(icon: Int) {
     IconButton(onClick = {}) {
         Image(
-            imageResource(icon),
-            modifier = Modifier.preferredSize(24.dp)
+            painterResource(icon),
+            contentDescription = null,
+            modifier = Modifier.size(24.dp)
         )
     }
 }

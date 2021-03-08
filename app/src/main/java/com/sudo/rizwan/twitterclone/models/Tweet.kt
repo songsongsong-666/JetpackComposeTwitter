@@ -1,9 +1,9 @@
 package com.sudo.rizwan.twitterclone.models
 
-import androidx.compose.Model
+//import androidx.compose.Model
 import java.util.*
 
-@Model
+// TODO @Model
 data class Tweet(
     val user: User,
     val tweet: String,

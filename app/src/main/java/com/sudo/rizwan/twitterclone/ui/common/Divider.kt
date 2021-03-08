@@ -1,11 +1,17 @@
 package com.sudo.rizwan.twitterclone.ui.common
 
-import androidx.compose.Composable
-import androidx.ui.graphics.Color
-import androidx.ui.material.Divider
-import com.sudo.rizwan.twitterclone.state.isLightTheme
+import androidx.compose.material.Divider
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.graphics.Color
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.sudo.rizwan.twitterclone.lightThemeColors
+import com.sudo.rizwan.twitterclone.state.AppStateViewModel
 
 @Composable
 fun CustomDivider() {
-    Divider(color = if (isLightTheme()) Color(0xFFEEEEEE) else Color(0xFF333333))
+    val appState = viewModel<AppStateViewModel>()
+    val theme = appState.theme.observeAsState(lightThemeColors)
+
+    Divider(color = if (theme.value!!.isLight) Color(0xFFEEEEEE) else Color(0xFF333333))
 }

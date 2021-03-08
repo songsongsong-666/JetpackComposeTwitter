@@ -1,25 +1,44 @@
 package com.sudo.rizwan.twitterclone.ui.profile
 
-import androidx.compose.Composable
-import androidx.ui.core.ContentScale
-import androidx.ui.core.Modifier
-import androidx.ui.core.clip
-import androidx.ui.core.tag
-import androidx.ui.foundation.*
-import androidx.ui.foundation.shape.corner.RoundedCornerShape
-import androidx.ui.graphics.Color
-import androidx.ui.layout.*
-import androidx.ui.material.Button
-import androidx.ui.material.IconButton
-import androidx.ui.material.icons.Icons
-import androidx.ui.material.icons.filled.ArrowBack
-import androidx.ui.material.icons.filled.MoreVert
-import androidx.ui.res.imageResource
-import androidx.ui.unit.dp
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.Button
+import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
+import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.layoutId
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
+import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.constraintlayout.compose.ConstraintSet
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.sudo.rizwan.twitterclone.lightThemeColors
 import com.sudo.rizwan.twitterclone.models.User
-import com.sudo.rizwan.twitterclone.state.AppState
+import com.sudo.rizwan.twitterclone.state.AppStateViewModel
 import com.sudo.rizwan.twitterclone.state.Screen
-import com.sudo.rizwan.twitterclone.state.navigateTo
 import com.sudo.rizwan.twitterclone.state.tweets
 import com.sudo.rizwan.twitterclone.ui.common.CustomDivider
 import com.sudo.rizwan.twitterclone.ui.common.TweetLayout
@@ -27,27 +46,36 @@ import com.sudo.rizwan.twitterclone.ui.common.UserInfo
 
 @Composable
 fun Profile(user: User) {
-    VerticalScroller {
+    Box(
+        modifier = Modifier.verticalScroll(state = rememberScrollState())
+    ) {
         ConstraintLayout(constraintSet = ConstraintSet {
-            val banner = tag("banner")
-            val closeButton = tag("close")
-            val moreButton = tag("more")
-            val avatar = tag("avatar")
-            val content = tag("content")
-            val followButton = tag("follow")
-            avatar.top constrainTo banner.bottom
-            avatar.bottom constrainTo banner.bottom
-            avatar.left constrainTo parent.left
-            avatar.left.margin = 16.dp
-            followButton.top constrainTo banner.bottom
-            followButton.right constrainTo parent.right
-            followButton.right.margin = 16.dp
-            followButton.top.margin = 16.dp
-            closeButton.top constrainTo parent.top
-            closeButton.left constrainTo parent.left
-            moreButton.top constrainTo parent.top
-            moreButton.right constrainTo parent.right
-            content.top constrainTo banner.bottom
+            val banner = createRefFor("banner")
+            val closeButton = createRefFor("close")
+            val moreButton = createRefFor("more")
+            val avatar = createRefFor("avatar")
+            val content = createRefFor("content")
+            val followButton = createRefFor("follow")
+            constrain(avatar) {
+                top.linkTo(banner.bottom)
+                bottom.linkTo(banner.bottom)
+                start.linkTo(parent.start, 16.dp)
+            }
+            constrain(followButton) {
+                top.linkTo(banner.bottom, 16.dp)
+                end.linkTo(parent.end, 16.dp)
+            }
+            constrain(closeButton) {
+                top.linkTo(parent.top)
+                start.linkTo(parent.start)
+            }
+            constrain(moreButton) {
+                top.linkTo(parent.top)
+                end.linkTo(parent.end)
+            }
+            constrain(content) {
+                top.linkTo(banner.bottom)
+            }
         }) {
             Banner(user)
             FollowButton()
@@ -60,14 +88,14 @@ fun Profile(user: User) {
 
 @Composable
 private fun ProfileContent(user: User) {
-    Column(modifier = Modifier.tag("content")) {
+    Column(modifier = Modifier.layoutId("content")) {
         Column(modifier = Modifier.padding(start = 16.dp, end = 16.dp)) {
-            Spacer(modifier = Modifier.preferredHeight(44.dp))
+            Spacer(modifier = Modifier.height(44.dp))
             UserInfo(
                 user = user,
                 showBio = true
             )
-            Spacer(modifier = Modifier.preferredHeight(16.dp))
+            Spacer(modifier = Modifier.height(16.dp))
         }
         CustomDivider()
         tweets.filter { it.user == user }.forEach { tweet ->
@@ -79,14 +107,18 @@ private fun ProfileContent(user: User) {
 
 @Composable
 private fun Avatar(user: User) {
+    val appState = viewModel<AppStateViewModel>()
+    val theme = appState.theme.observeAsState(lightThemeColors)
+
     Image(
-        imageResource(user.avatar),
+        painterResource(user.avatar),
+        contentDescription = null,
         modifier = Modifier
-            .preferredSize(80.dp)
+            .size(80.dp)
             .clip(shape = RoundedCornerShape(40.dp))
-            .tag("avatar")
-            .drawBorder(
-                border = Border(size = 3.dp, color = AppState.theme.surface),
+            .layoutId("avatar")
+            .border(
+                border = BorderStroke(3.dp, color = theme.value!!.surface),
                 shape = RoundedCornerShape(40.dp)
             ),
         contentScale = ContentScale.Crop
@@ -95,44 +127,52 @@ private fun Avatar(user: User) {
 
 @Composable
 private fun TopBar() {
+    val appState = viewModel<AppStateViewModel>()
+
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         IconButton(
-            modifier = Modifier.tag("close"),
-            onClick = { navigateTo(Screen.Home) }) {
-            Icon(asset = Icons.Filled.ArrowBack, tint = Color.White)
+            modifier = Modifier.layoutId("close"),
+            onClick = { appState.navigateTo(Screen.Home) }) {
+            Icon(Icons.Filled.ArrowBack, contentDescription = null, tint = Color.White)
         }
 
-        IconButton(modifier = Modifier.tag("more"), onClick = {}) {
-            Icon(asset = Icons.Filled.MoreVert, tint = Color.White)
+        IconButton(modifier = Modifier.layoutId("more"), onClick = {}) {
+            Icon(Icons.Filled.MoreVert, contentDescription = null, tint = Color.White)
         }
     }
 }
 
 @Composable
 private fun FollowButton() {
+    val appState = viewModel<AppStateViewModel>()
+    val theme = appState.theme.observeAsState(lightThemeColors)
+
     Button(
-        modifier = Modifier.tag("follow"),
+        modifier = Modifier.layoutId("follow"),
         onClick = {
         },
         shape = RoundedCornerShape(20.dp),
-        backgroundColor = AppState.theme.surface,
-        border = Border(1.dp, AppState.theme.primary)
+        colors = ButtonDefaults.buttonColors(
+            backgroundColor = theme.value!!.surface
+        ),
+        border = BorderStroke(1.dp, theme.value!!.primary)
     ) {
-        Text(text = "Follow", color = AppState.theme.primary)
+        Text(text = "Follow", color = theme.value!!.primary)
     }
 }
 
 @Composable
 private fun Banner(user: User) {
     Image(
-        imageResource(user.banner),
+        painterResource(user.banner),
+        contentDescription = null,
         modifier = Modifier
-            .preferredHeight(180.dp)
+            .height(180.dp)
             .fillMaxWidth()
-            .tag("banner"),
+            .layoutId("banner"),
         contentScale = ContentScale.Crop
     )
 }
