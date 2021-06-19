@@ -1,6 +1,7 @@
 package com.sudo.rizwan.twitterclone.state
 
-import androidx.compose.Model
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
 import com.sudo.rizwan.twitterclone.lightThemeColors
 import com.sudo.rizwan.twitterclone.models.User
 
@@ -10,16 +11,11 @@ sealed class Screen {
     object Compose : Screen()
 }
 
-@Model
-object AppState {
-    var currentScreen: Screen = Screen.Home
-    var theme = lightThemeColors
-}
+class AppStateViewModel : ViewModel() {
+    val currentScreen = MutableLiveData<Screen>(Screen.Home)
+    val theme = MutableLiveData(lightThemeColors)
 
-fun navigateTo(destination: Screen) {
-    AppState.currentScreen = destination
-}
-
-fun isLightTheme(): Boolean {
-    return AppState.theme.isLight
+    fun navigateTo(destination: Screen) {
+        currentScreen.value = destination
+    }
 }

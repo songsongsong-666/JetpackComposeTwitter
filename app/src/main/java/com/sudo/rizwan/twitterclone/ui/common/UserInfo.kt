@@ -1,13 +1,17 @@
 package com.sudo.rizwan.twitterclone.ui.common
 
-import androidx.compose.Composable
-import androidx.ui.core.Alignment
-import androidx.ui.core.Modifier
-import androidx.ui.layout.*
-import androidx.ui.text.TextStyle
-import androidx.ui.text.font.FontWeight
-import androidx.ui.unit.dp
-import androidx.ui.unit.sp
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.sudo.rizwan.twitterclone.models.User
 
 @Composable
@@ -18,16 +22,16 @@ fun UserInfo(user: User, showBio: Boolean = false) {
     )
     ThemedText(text = "@${user.username}")
     if (showBio) {
-        Spacer(modifier = Modifier.preferredHeight(8.dp))
+        Spacer(modifier = Modifier.height(8.dp))
         ThemedText(
             text = user.bio,
             style = TextStyle(fontSize = 14.sp)
         )
     }
-    Spacer(modifier = Modifier.preferredHeight(8.dp))
+    Spacer(modifier = Modifier.height(8.dp))
     Row(
         horizontalArrangement = Arrangement.SpaceBetween,
-        verticalGravity = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically
     ) {
         ThemedText(
             text = "${user.following} ",
@@ -37,7 +41,7 @@ fun UserInfo(user: User, showBio: Boolean = false) {
             text = "Following",
             style = TextStyle(fontSize = 14.sp)
         )
-        Spacer(modifier = Modifier.preferredWidth(24.dp))
+        Spacer(modifier = Modifier.width(24.dp))
         ThemedText(
             text = "${user.followers} ",
             style = TextStyle(fontWeight = FontWeight.Bold)
